@@ -1,46 +1,53 @@
 # -*- coding: utf-8 -*-
-import matplotlib.pyplot as plt
-import numpy as np
-from sklearn import datasets, linear_model
-from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np 
+import matplotlib.pyplot as plt 
 
-# Load the diabetes dataset
-diabetes = datasets.load_diabetes()
+def estimate_coef(x, y): 
+	# количество точек
+	n = np.size(x) 
 
+	# среднее для векторов x и y
+	m_x, m_y = np.mean(x), np.mean(y) 
 
-# Use only one feature
-diabetes_X = diabetes.data[:, np.newaxis, 2]
+	# вычисление перекрестного отклонения и отклонения от x
+	SS_xy = np.sum(y*x) - n*m_y*m_x 
+	SS_xx = np.sum(x*x) - n*m_x*m_x 
 
-# Split the data into training/testing sets
-diabetes_X_train = diabetes_X[:-15]
-diabetes_X_test = diabetes_X[-15:]
+	# вычисление коэффициентов регрессии
+	b_1 = SS_xy / SS_xx 
+	b_0 = m_y - b_1*m_x 
 
-# Split the targets into training/testing sets
-diabetes_y_train = diabetes.target[:-15]
-diabetes_y_test = diabetes.target[-15:]
+	return(b_0, b_1) 
 
-# Create linear regression object
-regr = linear_model.LinearRegression()
+def plot_regression_line(x, y, b): 
+	# отображение фактических точек в виде графика
+	plt.scatter(x, y, color = "m", 
+			marker = "o", s = 30) 
 
-# Train the model using the training sets
-regr.fit(diabetes_X_train, diabetes_y_train)
+	# Вектора (предсказанн. вект. ОТкл) 
+	y_pred = b[0] + b[1]*x 
 
-# Make predictions using the testing set
-diabetes_y_pred = regr.predict(diabetes_X_test)
+	# построение линии
+	plt.plot(x, y_pred, color = "g") 
 
-# The coefficients
-print('Coefficients: \n', regr.coef_)
-# The mean squared error
-print("Mean squared error: %.2f"
-      % mean_squared_error(diabetes_y_test, diabetes_y_pred))
-# Explained variance score: 1 is perfect prediction
-print('Variance score: %.2f' % r2_score(diabetes_y_test, diabetes_y_pred))
+	# Лэйблы 
+	plt.xlabel('x') 
+	plt.ylabel('y') 
 
-# Plot outputs
-plt.scatter(diabetes_X_test, diabetes_y_test,  color='black')
-plt.plot(diabetes_X_test, diabetes_y_pred, color='blue', linewidth=3)
+	# Функция показа 
+	plt.show() 
 
-plt.xticks(())
-plt.yticks(())
+def main(): 
+	# Массив чисел (Х соотносится с У по индексу массиву) 
+	x = np.array([0, 1, 2, 15, 8]) 
+	y = np.array([1, 3, 2, 10, 3]) 
 
-plt.show()
+	# оценки коэффициентов
+	b = estimate_coef(x, y) 
+	print("Приблизительные коэффициенты:\nb_0 = {} \nb_1 = {}".format(b[0], b[1])) 
+
+	# Отрисовка линии
+	plot_regression_line(x, y, b) 
+
+if __name__ == "__main__": 
+	main() 
